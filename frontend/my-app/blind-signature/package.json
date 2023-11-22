@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "blind-signatures": "^1.0.7",
+    "prompt-sync": "^4.2.0"
+  }
+}

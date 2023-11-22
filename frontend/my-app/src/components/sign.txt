@@ -1,0 +1,24 @@
+// Instructions (make sure this is saved into a javascript file):
+// 1. Replace 'public key' and 'private key' with your generated private and public key
+// 2. Replace 'blinded token' with token recevied from the system
+// 3. Run 'node sign.js' in the terminal.
+// 4. Upload the resulting signed token to the system.
+
+const BlindSignature = require('blind-signatures');
+const NodeRSA = require('node-rsa');
+
+const pub = prompt("Public key in PEM?");
+const priv = prompt("Priv key in PEM?");
+
+const key = new NodeRSA();
+key.importKey(pub, 'pkcs8-public')
+key.importKey(priv, 'pkcs8-private')
+
+const signed = BlindSignature.sign({
+    blinded: 'blinded token',
+    key: key,
+});
+
+console.log(signed.toString());
+
+
