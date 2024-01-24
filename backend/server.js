@@ -45,7 +45,7 @@ socketIO.on('connection', (socket) => {
       });
 
     socket.on('disconnect', () => {
-      console.log('🔥: A user disconnected');
+      console.log('*: A user disconnected');
     });
 });
 
