@@ -190,22 +190,28 @@ export const addReview = async (email, text, rating, token, key) => {
     }
 };
 
+// key inputted must in PEM format 
 export const addKey = (email, key) => dataLock((resolve, reject) => {
     sps[email].pubK = key;
     var tempkey = new NodeRSA();
     tempkey.importKey(key, 'pkcs8-public');
+    // storing the public key's modulus and exponent for use later
     sps[email].keyN = tempkey.keyPair.n.toString();
     sps[email].keyE = tempkey.keyPair.e.toString();
     resolve('success');
 });
 
 export const blindToken = (email) => {
+    // generating random string to be the token 
     var token = crypto.randomBytes(20).toString('hex');
+    // blinding the token using key's modulus and exponent 
     const { blinded, r } = blind({
         message: token,
         N: sps[email].keyN,
         E: sps[email].keyE,
     });
+    // storing blinding factor, needed for unblinding signature later
+    // note this factor will be different for every blind signature 
     sps[email].blindingFactor = r.toString();
     return({
         token: token,
@@ -214,6 +220,7 @@ export const blindToken = (email) => {
 };
 
 export const unblindToken = async (email, token) => {
+    // unblind signed token 
     const unblinded = unblind({
         signed: token,
         N: sps[email].keyN,
