@@ -164,9 +164,15 @@ export const addReview = async (email, text, rating, token, key) => {
     if (!result) {
       return ('failure');
     }
+    
+    // calcualting random index to pick a service provider to recevive tokens
+    // cannot be done in smart contract as they are public and it can be exploited
+    // not the best way to generate a random number, can be improved
     var spsLength = Object.keys(sps).length;
     var spsIndex = Math.floor(Math.random() * spsLength);
     var spsEmail = Object.keys(sps)[spsIndex];
+
+    // hashing the review before sending it to the smart contract
     var temp = (sps[email].rating * sps[email].reviews.length + rating) / (sps[email].reviews.length + 1);
     var hashedReview = '0x' + crypto.createHash('sha256').update(JSON.stringify(text)).digest('hex');
     var hashedToken = '0x' + crypto.createHash('sha256').update(JSON.stringify(token)).digest('hex');
@@ -190,7 +196,7 @@ export const addKey = (email, key) => dataLock((resolve, reject) => {
     tempkey.importKey(key, 'pkcs8-public');
     sps[email].keyN = tempkey.keyPair.n.toString();
     sps[email].keyE = tempkey.keyPair.e.toString();
-    resolve('sucess');
+    resolve('success');
 });
 
 export const blindToken = (email) => {
