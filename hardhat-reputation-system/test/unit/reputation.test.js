@@ -2,7 +2,6 @@ const { expect } = require("chai");
 const { deployments, ethers, getNamedAccounts, network } = require("hardhat");
 const { developmentChain } = require("../../helper-hardhat-config");
 
-// if network name is either localhost or hardhat, run test. Otherwise skip
 !developmentChain.includes(network.name)
   ? describe.skip
   : describe("ReputationFactory", function () {
@@ -20,7 +19,6 @@ const { developmentChain } = require("../../helper-hardhat-config");
         const factoryAddress = (await deployments.get("ReputationFactory")).address;
         factory = await ethers.getContractAt("ReputationFactory", factoryAddress);
 
-        // Create 5 service Provider
         await factory.createServiceProvider('Provider1');
         await factory.createServiceProvider("Provider2");
         await factory.createServiceProvider("Provider3");
@@ -34,16 +32,14 @@ const { developmentChain } = require("../../helper-hardhat-config");
         provider3 = await ethers.getContractAt("ServiceProvider",provider3Address);
       });
 
+      // check that you are able to get a review token by filtering for successful transfer of tokens event 
       it("sucessfully request review token", async function () {
-        // Creates service provider called "Commbank"
         await factory.createServiceProvider("Commbank");
 
-        // Create a review token which is stored by a user (the deployer)
         const serviceProviderAddress = await factory.getServiceProviderAddress("Commbank");
 
         const serviceProvider = await ethers.getContractAt("ServiceProvider", serviceProviderAddress);
 
-        // Get the tokenId from the event emitted called "Minted"
         await serviceProvider.createUserToken();
         filter = serviceProvider.filters.Minted;
         events = await serviceProvider.queryFilter(filter);
@@ -53,16 +49,16 @@ const { developmentChain } = require("../../helper-hardhat-config");
         expect(status).to.equal("transfer_success");
       });
 
+      // check that only the owner is able to get a review token 
       it("fails to create user token when account is not owner", async function () {
-        // Creates service provider called "Commbank"
         await factory.createServiceProvider("test");
         const serviceProviderAddress = await factory.getServiceProviderAddress("test");
         const serviceProvider = await ethers.getContractAt("ServiceProvider", serviceProviderAddress);
         await expect(serviceProvider.connect(account1).createUserToken()).to.be.rejectedWith("Sender is not authorised");
       });
 
+      // check that only the owner is able to upload a review
       it("fails to add review when account is not owner", async function () {
-        // Creates service provider called "Commbank"
         await factory.createServiceProvider("test");
         const serviceProviderAddress = await factory.getServiceProviderAddress("test");
         const serviceProvider = await ethers.getContractAt("ServiceProvider", serviceProviderAddress);
@@ -74,20 +70,17 @@ const { developmentChain } = require("../../helper-hardhat-config");
         )).to.be.rejectedWith("Sender is not authorised");
       });
 
+      // check that only the owner is able to create a service provider contract 
       it("fails to create a service provider when account is not owner", async function () {
         await expect(factory.connect(account1).createServiceProvider("test")).to.be.rejectedWith("Sender is not authorised");
       });
 
+      // check that multiple reviews are added correctly and values are update accordingly in the contract 
       it("successfully review multiple service provider", async function () {
-        // User1 creates review for Provider1, Provider2, Provider3
-        // User1 connects to contract, then user1 creates 3 review token for Provider1, Provider2, and, Provider3
         await provider1.createUserToken()
         await provider2.createUserToken()
         await provider3.createUserToken()
 
-        // ReputationFactory emits an event called "Minted" everytime a review token is created
-        // Filter those events and get the tokenId and submit a review using them
-        // User1 submits review to Provider1, Provider2, and, Provider3
         filter = provider1.filters.Minted;
         events = await provider1.queryFilter(filter);
         var stat = events[0].args.status;
@@ -133,6 +126,7 @@ const { developmentChain } = require("../../helper-hardhat-config");
         expect(rating).to.equal(5);
       });
 
+      // check that when a review is added tokens are transferred to a selected service provider contract 
       it("successfully transfer tokens to a service provider when review is added", async function () {
         await provider1.createUserToken();
         filter = provider1.filters.Minted;
@@ -147,6 +141,7 @@ const { developmentChain } = require("../../helper-hardhat-config");
         expect(stat).to.equal("transfer_success");
       });
 
+      // check that you are unable to submit multiple reviews for the same transaction 
       it("fails when using the same review token", async function () {
         await provider1.createUserToken();
         filter = provider1.filters.Minted;
@@ -168,6 +163,7 @@ const { developmentChain } = require("../../helper-hardhat-config");
         );
       });
 
+      // check that you cannot create multiple service provider contract for one service provider 
       it("fails when creating service provider of the same name", async function () {
         await factory.createServiceProvider("Alphabet");
         await expect(
@@ -178,6 +174,7 @@ const { developmentChain } = require("../../helper-hardhat-config");
         );
       });
 
+      // check that a service provider is unable to receive a review if they do not have enough tokens
       it("fails when service provider does not have enough SP token when asked to create review token", async function () {
         for (let i = 0; i < 10; i++) {
           await provider1.createUserToken();
