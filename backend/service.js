@@ -165,7 +165,7 @@ export const addReview = async (email, text, rating, token, key) => {
       return ('failure');
     }
     
-    // calcualting random index to pick a service provider to recevive tokens
+    // calculating random index to pick a service provider to receive tokens
     // cannot be done in smart contract as they are public and it can be exploited
     // not the best way to generate a random number, can be improved
     var spsLength = Object.keys(sps).length;
