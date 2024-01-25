@@ -6,6 +6,7 @@ Link to PDF: https://drive.google.com/file/d/1GZX52tgYBrrWDWEJR7UFbi6ekviBF0gG/v
 
 The PDF above goes through the system and how to run it in more detail.
 
+Note: Apologies this is so long overdue but this system was really just built for demo purposes and not very suitable to be directly built upon or containerized. Instead it is likely better if this code serves as a rough outline for the system and sections of it can be taken and continued to be worked on. 
 
 # Backend 
 
