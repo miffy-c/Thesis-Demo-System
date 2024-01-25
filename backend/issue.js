@@ -8,7 +8,7 @@ import { createTokenCredential } from './tokenCredential.js';
 import { createReputationCredential } from './reputationCredential.js';
 import { createKeyCredential } from './keyCredential.js';
 
-
+// custom documents for the document loader 
 const customDocuments = {
     "https://w3id.org/demoSystem/v1":  {
         "@context": {
@@ -49,6 +49,7 @@ const documentLoader = extendContextLoader(async url => {
     return defaultDocumentLoader(url);
   });
 
+// random key pair used for demo purposes
 const keyPair = await Ed25519VerificationKey2018.from({
     "id": "https://example.edu/issuers/keys/1",
     "type": "Ed25519VerificationKey2018",
