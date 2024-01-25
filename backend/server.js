@@ -25,6 +25,9 @@ app.use(express.json({ limit: '50mb', }));
 
 const httpserver = createServer(app); 
 app.use(cors());
+
+// using socketIO to simulate real time communication between two clients (i.e. service provider and user)
+// this only works for demo purposes, rewriting/another solution is likely necessary 
 const socketIO = new Server(httpserver, {
     cors: {
         origin: ["http://localhost:3000", "http://localhost:3001"]
@@ -33,13 +36,17 @@ const socketIO = new Server(httpserver, {
 
 socketIO.on('connection', (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);
-    
+
+    // when receiving transaction request, produce a token and perform blind signature on it
+    // send blinded token to SP and token to user
     socket.on('transaction', (data) => {
         var temp = blindToken(data);
         socket.broadcast.emit("transactionBlinded", temp.blinded);
         socket.emit("transactionToken", temp.token);
       });
 
+    // when receiving signed token request, unblind the signed blinded token
+    // send unblinded token to user
     socket.on('token', async (data) => {
         socket.broadcast.emit("unblindedToken", await unblindToken(data.email, data.token));
       });
